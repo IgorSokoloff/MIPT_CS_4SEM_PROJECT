@@ -1,6 +1,12 @@
 import math
-import random as rnd
 #service clas Vector2D
+
+
+"""
+There won't be any functions for planeStatic class in first beta version
+There won't be any differences beetwen "static" and "dinamic" spheres (static a also will update)
+
+"""
 
 
 class Vector2D:
@@ -43,7 +49,14 @@ class Vector2D:
         return Vector2D(-self.x, -self.y)
 
     def __mul__(self, other):
-        return self.x*other.x + self.y*other.y
+        if type(other) is Vector2D:
+            return self.x*other.x + self.y*other.y
+        return Vector2D(self.x * other, self.y * other)
+
+    def __rmul__(self, other):
+        if type(other) is Vector2D:
+            return self.x * other.x + self.y * other.y
+        return Vector2D(self.x * other, self.y * other)
 
     def __call__(self, x, y):
         self.x, self.y = x, y
@@ -137,54 +150,43 @@ class Sphere(RigidBody):
 
     def __iter__(self):
         pass
+
+
+    def update (self, dt):
+        self.vel += self.acc * dt
+        self.pos += self.vel * dt
+
 """
 This class contains containers of objects of the class. It used for set physical scene.
 You have to create only one intanse of class Scene.
 """
 class Scene:
 
-    def __init__(self, width=800, height=600, n_spheres=0, n_planes=0):
-        self.size = self.width, self.height = width, height
-        self.n_spheres, self.n_planes = n_spheres, n_planes
-
-        rnd.seed()
-
-        #list of all spheres
-        self.list_of_spheres = []
-
-        for i in range(0, self.n_spheres):
-            self.set_sphere(Vector2D(rnd.randint(10, self.width - 10), rnd.randint(10, self.height - 10)))
-
-        self.list_of_spheres.sort(reverse=True)
+    def __init__(self ):
+        self.n_planes = 0
+        self.n_spheres = 0
+        self.sphere = {}
 
     def __str__(self):
         str_out = ''
         for i in range(0, self.n_spheres):
-            str_out +=  i.__repr__() +' ' + self.list_of_spheres[i].__repr__() + '\n'
+            str_out +=  i.__repr__() +' ' + self.sphere[i].__repr__() + '\n'
         return str_out
 
 
-
-    """
-    Add sphere to list of spheres
-    """
-    def set_sphere(self, pos, vel=Vector2D(0, 0), acc=Vector2D(0, 0), mass=1, radius=10):
-        self.list_of_spheres.append(Sphere(pos, vel, acc, mass, rnd.randint(1, 10)))
+    def add_sphere(self, pos, vel=Vector2D(0, 0), acc=Vector2D(0, 0), mass=1, radius=10):
+        self.sphere[self.n_spheres] = Sphere(pos, vel, acc, mass, radius)
+        self.n_spheres += 1
 
     def set_plane(self):
         pass
 
-    def update(self):
-        pass
+    def update(self, dt):
+        for i in range(0, self.n_spheres):
+            self.sphere[i].update(dt)
 
 
 
 class Cell:
     pass
-
-sc = Scene(800, 600, 10)
-
-print(sc)
-
-
 

@@ -1,28 +1,8 @@
 import pygame
 import math
 import engine
+import random as rnd
 
-class Vec2:
-    def __init__(self, x = 0, y = 0):
-        self.x, self.y = x, y
-
-    def __add__(self, v):
-        return Vec2(self.x + v.x, self.y + v.y)
-
-    def __sub__(self, v):
-        return Vec2(self.x - v.x, self.y - v.y)
-
-    def __mul__(self, alpha):
-        return Vec2(self.x * alpha, self.y * alpha)
-
-    def __rmul__(self, alpha):
-        return Vec2(self.x * alpha, self.y * alpha)
-
-    def intpair(self):
-        return (int(self.x), int(self.y))
-
-    def len(self):
-        return math.sqrt(self.x * self.x + self.y * self.y)
 
 class Rect:
     def __init__(self, left, top, right, bottom):
@@ -34,6 +14,56 @@ class Frame:
         self.pressed = pressed
         self.dt = dt
 
+"""
+Derived class from Scene
+It has function for rendering
+"""
+class GScene(engine.Scene):
+    def __init__(self):
+        super(GScene, self).__init__()
+        self.sphere_color = {}
+
+    def handle_border(self, rect=Rect(0, 0, 800, 600)):
+        for i in range(0, self.n_spheres):
+            if self.sphere[i].pos.x - self.sphere[i].radius < rect.left:
+                if self.sphere.vel.x < 0:
+                    self.sphere.vel.x = -self.sphere[i].vel.x
+                    self.sphere[i].pos.x = rect.left + self.sphere[i].radius
+
+            if self.sphere[i].pos.y - self.sphere[i].radius < rect.top:
+                if self.sphere[i].vel.y < 0:
+                    self.sphere[i].vel.y = -self.sphere[i].vel.y
+                    self.sphere[i].pos.y = rect.top + self.sphere[i].radius
+
+            if self.sphere[i].pos.x + self.sphere[i].radius > rect.right:
+                if self.sphere[i].vel.x > 0:
+                    self.sphere[i].vel.x = -self.sphere[i].vel.x
+                    self.sphere[i].pos.x = rect.right - self.sphere[i].radius;
+
+            if self.sphere[i].pos.y + self.sphere[i].radius > rect.bottom:
+                if self.sphere[i].vel.y > 0:
+                    self.sphere[i].vel.y = -self.sphere[i].vel.y
+                    self.sphere[i].pos.y = rect.bottom - self.sphere[i].radius
+
+    """Update scene state"""
+    def update_graphick_scene(self, frame):
+        #f = Vec2()
+        #f.x = frame.pressed[pygame.K_RIGHT] - frame.pressed[pygame.K_LEFT];
+        #f.y = frame.pressed[pygame.K_DOWN] - frame.pressed[pygame.K_UP];
+        #f *= self.a
+        self.handle_border()
+        self.update(frame.dt)
+
+
+
+    def render(self, canvas):
+        """Draw Player on the Game window"""
+        for i in range(0, self.n_spheres):
+            canvas.circle(self.sphere_color[i],
+                          self.sphere[i].pos.intpair(),
+                          self.sphere[i].radius)
+
+
 class Canvas:
     def __init__(self, screen):
         self.screen = screen
@@ -44,64 +74,14 @@ class Canvas:
     def circle(self, color, pos, radius):
         pygame.draw.circle(self.screen, color, pos, radius)
 
-class Player:
-    def refresh_color(self):
-        """Set color (it depens on the module of Player speed)"""
-        self.color = min(255, int(self.v.len()) + 100)
-
-    def __init__(self, pos, rect, a = 500, radius = 20):
-        """Constructor of Player class
-        self.a - acceleration coef.
-        self.r - radius
-        """
-        self.pos, self.a, self.r = Vec2(*pos), a, radius
-        self.rect = rect
-        self.v = Vec2()
-        self.refresh_color()
-
-    def handle_border(self):
-        if self.pos.x - self.r < self.rect.left:
-            if self.v.x < 0:
-                self.v.x = -self.v.x
-            self.pos.x = self.rect.left + self.r
-        if self.pos.y - self.r < self.rect.top:
-            if self.v.y < 0:
-                self.v.y = -self.v.y
-            self.pos.y = self.rect.top + self.r
-        if self.pos.x + self.r > self.rect.right:
-            if self.v.x > 0:
-                self.v.x = -self.v.x
-            self.pos.x = self.rect.right - self.r;
-        if self.pos.y + self.r > self.rect.bottom:
-            if self.v.y > 0:
-                self.v.y = -self.v.y
-            self.pos.y = self.rect.bottom - self.r
-
-    def update(self, frame):
-        """Update Player state"""
-        f = Vec2()
-        f.x = frame.pressed[pygame.K_RIGHT] - frame.pressed[pygame.K_LEFT];
-        f.y = frame.pressed[pygame.K_DOWN] - frame.pressed[pygame.K_UP];
-        f *= self.a
-        self.v = self.v + frame.dt * (f - self.v)
-        self.pos += frame.dt * self.v
-
-        self.handle_border()
-
-        self.refresh_color()
-
-    def render(self, canvas):
-        """Draw Player on the Game window"""
-        canvas.circle((self.color, self.color, self.color),
-                      self.pos.intpair(), self.r)
 
 class World:
     def __init__(self):
-        self.unit = []
+        self.units = []
 
     def update(self, frame):
         for u in self.units:
-            u.update(frame)
+            u.update_graphick_scene(frame)
 
     def render(self, canvas):
         canvas.clear()
@@ -112,10 +92,13 @@ class World:
         self.units.append(u)
 
 class Game:
+    #self.world.addUnit(Player(pos=(50, 50), rect=Rect(0, 0, self.width, self.height)))
     def __init__(self):
         self._running = True
         self.size = self.width, self.height = 800, 600
         self.screen = pygame.display.set_mode(self.size, pygame.HWSURFACE)
+
+        self.fps = 50
 
         pygame.display.set_caption('Game')
 
@@ -125,7 +108,26 @@ class Game:
 
         self.world = World()
 
-        self.world.addUnit(Player(pos = (50, 50), rect = Rect(0, 0, 800, 600)))
+        rnd.seed()
+        self.number_speres = 2 #default
+
+        self.scene = GScene()
+
+
+        #TODO: перегрузить вызов Scene
+
+        for i in range(0, self.number_speres):
+            self.scene.add_sphere(engine.Vector2D(rnd.randint(10, self.width - 10),
+                                                  rnd.randint(10, self.height - 10)),
+                                  engine.Vector2D(0, 0),
+                                  engine.Vector2D(0, 100))
+            self.scene.sphere_color[i] = (rnd.randint(0, 255),
+                                          rnd.randint(0, 255),
+                                          rnd.randint(0, 255))
+
+        self.world.addUnit(self.scene)
+
+
 
     def exit(self):
         """Exit the game"""
@@ -145,6 +147,11 @@ class Game:
         """Cleanup the Game"""
         pygame.quit()
 
+    def flip(self):
+
+        pygame.display.flip()
+        self.clock.tick(self.fps)
+
     def execute(self):
         """Execution loop of the game"""
         while self._running:
@@ -152,10 +159,13 @@ class Game:
             for event in pygame.event.get():
                 self.handle_event(event)
 
-            dt = self.clock.tick(50) / 1000.0
+            dt = self.clock.tick(self.fps) / 1000.0
             self.world.update(Frame(pygame.key.get_pressed(), dt))
             self.world.render(self.canvas)
-            pygame.display.flip()
+
+            #print( self.clock.get_fps() )
+
+            self.flip()
 
         self.cleanup()
 
