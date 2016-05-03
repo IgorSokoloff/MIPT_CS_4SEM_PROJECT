@@ -248,6 +248,7 @@ class Scene:
                 self.sphere[i].update(dt)
                 if (abs(  self.sphere[i].pos - self.sphere[j].pos  ) < (self.sphere[i].radius + self.sphere[j].radius)):
                     self.depth.append( (self.sphere[i].radius + self.sphere[j].radius) - abs(  self.sphere[i].pos - self.sphere[j].pos  ))
+
                     self.sphere[i](pos_ex_i, vel_ex_i, acc_ex_i)
                     self.sphere[j](pos_ex_j, vel_ex_j, acc_ex_j)
                     col_spheres.append((i, j))
@@ -275,12 +276,12 @@ class Scene:
     def calculate_impulse(self, normal, contact, i, j ):
         R1 = contact - self.sphere[i].pos
         R2 = contact - self.sphere[j].pos
-        MIN_V = 8
+        MIN_V = 300
         E = 1
         #Z1 = normal.сross_product(R1) * self.sphere[i].imass
         #Z2 = normal.сross_product(R2) * self.sphere[j].imass
 
-        J = ( normal.x * (normal.x * self.sphere[i].imass + normal.x * self.sphere[j].imass)
+        J = (   normal.x * (normal.x * self.sphere[i].imass + normal.x * self.sphere[j].imass)
               + normal.y * (normal.y * self.sphere[i].imass + normal.y * self.sphere[j].imass) )
         return ( MIN_V - (1 + E) * self.vel_relative(normal,contact, i, j) ) / J
 
@@ -291,7 +292,7 @@ class Scene:
             #print (col_spheres[i][0], col_spheres[i][1])
 
             #self.sphere[col_spheres[i][0]].vel = (self.sphere[col_spheres[i][0]].vel * (m1 - m2) + (2 * m2 * self.sphere[col_spheres[i][1]].vel))/(m1 + m2)
-            #self.sphere[col_spheres[i][1]].vel = -(self.sphere[col_spheres[i][1]].vel * (m2 - m1) + (2 * m1 * self.sphere[col_spheres[i][0]].vel))/(m1 + m2)
+            #self.sphere[col_spheres[i][1]].vel = -(self.sphereЫ[col_spheres[i][1]].vel * (m2 - m1) + (2 * m1 * self.sphere[col_spheres[i][0]].vel))/(m1 + m2)
 
             contact = self.calculate_contact(col_spheres[i][0], col_spheres[i][1])
             normal =  self.calculate_normal(col_spheres[i][0], col_spheres[i][1])
@@ -300,16 +301,15 @@ class Scene:
             self.sphere[col_spheres[i][1]].apply_impulse(contact, normal, -impulse)
             print ("")
 
-            #self.sphere[col_spheres[i][0]].update_pos(dt)
-            #self.sphere[col_spheres[i][1]].update_pos(dt)
+            self.sphere[col_spheres[i][0]].update_pos(dt)
+            self.sphere[col_spheres[i][1]].update_pos(dt)
 
-            while (abs(self.sphere[col_spheres[i][0]].pos - self.sphere[col_spheres[i][1]].pos) <
+            """while (abs(self.sphere[col_spheres[i][0]].pos - self.sphere[col_spheres[i][1]].pos) <
                        (self.sphere[col_spheres[i][0]].radius + self.sphere[col_spheres[i][1]].radius)):
                 self.sphere[col_spheres[i][0]].update_pos(dt)
-                self.sphere[col_spheres[i][1]].update_pos(dt)
-
-            self.sphere[col_spheres[i][0]].update(dt)
-            self.sphere[col_spheres[i][1]].update(dt)
+                self.sphere[col_spheres[i][1]].update_pos(dt)"""
+            #self.sphere[col_spheres[i][0]].update(dt)
+            #self.sphere[col_spheres[i][1]].update(dt)
 
 
     def update(self, dt):

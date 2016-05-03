@@ -137,8 +137,8 @@ class Game:
                               engine.Vector2D(600, 0),
                               engine.Vector2D(0, 0), 1, 50)
 
-        self.scene.add_sphere(engine.Vector2D(300, 140),
-                              engine.Vector2D(200, 0),
+        self.scene.add_sphere(engine.Vector2D(500, 140),
+                              engine.Vector2D(0, 0),
                               engine.Vector2D(0, 0), 1, 50)
 
         self.scene.sphere_color[0] = (rnd.randint(0, 255),
