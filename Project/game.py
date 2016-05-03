@@ -22,12 +22,13 @@ class GScene(engine.Scene):
     def __init__(self):
         super(GScene, self).__init__()
         self.sphere_color = {}
+        print('Create')
 
     def handle_border(self, rect=Rect(0, 0, 800, 600)):
         for i in range(0, self.n_spheres):
             if self.sphere[i].pos.x - self.sphere[i].radius < rect.left:
-                if self.sphere.vel.x < 0:
-                    self.sphere.vel.x = -self.sphere[i].vel.x
+                if self.sphere[i].vel.x < 0:
+                    self.sphere[i].vel.x = -self.sphere[i].vel.x
                     self.sphere[i].pos.x = rect.left + self.sphere[i].radius
 
             if self.sphere[i].pos.y - self.sphere[i].radius < rect.top:
@@ -53,6 +54,8 @@ class GScene(engine.Scene):
         #f *= self.a
         self.handle_border()
         self.update(frame.dt)
+        self.colision_response_spheres(self.collision_detection_spheres(frame.dt), frame.dt)
+
 
 
 
@@ -62,6 +65,11 @@ class GScene(engine.Scene):
             canvas.circle(self.sphere_color[i],
                           self.sphere[i].pos.intpair(),
                           self.sphere[i].radius)
+
+    #def generate_scene_none_intersects(self):
+
+     #   for i in range (0, self.n_spheres):
+
 
 
 class Canvas:
@@ -109,21 +117,37 @@ class Game:
         self.world = World()
 
         rnd.seed()
-        self.number_speres = 2 #default
+        self.number_speres = 5 #default
 
         self.scene = GScene()
 
-
         #TODO: перегрузить вызов Scene
 
-        for i in range(0, self.number_speres):
+        """for i in range(0, self.number_speres):
             self.scene.add_sphere(engine.Vector2D(rnd.randint(10, self.width - 10),
                                                   rnd.randint(10, self.height - 10)),
-                                  engine.Vector2D(0, 0),
-                                  engine.Vector2D(0, 100))
+                                  engine.Vector2D(rnd.randint(400, 500),
+                                                  rnd.randint(700, 800)),
+                                  engine.Vector2D(0, 0), 1, 50)
             self.scene.sphere_color[i] = (rnd.randint(0, 255),
                                           rnd.randint(0, 255),
+                                          rnd.randint(0, 255))"""
+
+        self.scene.add_sphere(engine.Vector2D(100, 100),
+                              engine.Vector2D(600, 0),
+                              engine.Vector2D(0, 0), 1, 50)
+
+        self.scene.add_sphere(engine.Vector2D(300, 140),
+                              engine.Vector2D(200, 0),
+                              engine.Vector2D(0, 0), 1, 50)
+
+        self.scene.sphere_color[0] = (rnd.randint(0, 255),
+                                          rnd.randint(0, 255),
                                           rnd.randint(0, 255))
+
+        self.scene.sphere_color[1] = (rnd.randint(0, 255),
+                                    rnd.randint(0, 255),
+                                    rnd.randint(0, 255))
 
         self.world.addUnit(self.scene)
 

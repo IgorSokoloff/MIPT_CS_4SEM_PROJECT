@@ -14,6 +14,16 @@ class Vector2D:
         self.x = x
         self.y = y
 
+    def norm(self):
+        self.x = self.x / abs(self)
+        self.y = self.y / abs(self)
+    """
+    It returns scalar
+    @param: other - Vector2D
+    """
+    def сross_product (self, other):
+        return (self.x * other.y - self.y * other.x )
+
     def __repr__(self):
         return 'Vector2D({}, {})'.format(self.x, self.y)
 
@@ -57,6 +67,9 @@ class Vector2D:
         if type(other) is Vector2D:
             return self.x * other.x + self.y * other.y
         return Vector2D(self.x * other, self.y * other)
+
+    def __truediv__(self, other ):
+        return Vector2D(self.x / other, self.y / other)
 
     def __call__(self, x, y):
         self.x, self.y = x, y
@@ -112,6 +125,8 @@ class RigidBody:
     def __init__(self, pos, vel=Vector2D(0, 0), acc=Vector2D(0, 0), mass=1):
         self.pos, self.vel, self.acc = pos, vel, acc
         self.mass = mass
+        self.imass = 1/mass
+
 
 class Sphere(RigidBody):
     def __init__(self,  pos, vel=Vector2D(0, 0), acc=Vector2D(0, 0), mass=1, radius=10):
@@ -148,13 +163,30 @@ class Sphere(RigidBody):
     def __str__(self):
         return '({}, {}, {}, {}, {})'.format(self.pos, self.vel, self.acc, self.mass, self.radius)
 
+    def __call__(self, pos, vel, acc):
+        self.pos, self.vel, self.acc = pos, vel, acc
+
     def __iter__(self):
         pass
 
+    def apply_impulse(self, contact, normal, impulse):
+        self.vel += impulse * normal * self.imass
+
+    def update_vel(self, dt):
+        self.vel += self.acc * dt
+
+    def update_pos (self, dt):
+        self.pos += self.vel * dt
+
+    """
+    update position and velocity
+    """
+
 
     def update (self, dt):
-        self.vel += self.acc * dt
-        self.pos += self.vel * dt
+        self.update_vel(dt)
+        self.update_pos(dt)
+
 
 """
 This class contains containers of objects of the class. It used for set physical scene.
@@ -167,6 +199,10 @@ class Scene:
         self.n_spheres = 0
         self.sphere = {}
 
+        self.depth = []
+        # array of index
+        #self.l_sphere = []
+
     def __str__(self):
         str_out = ''
         for i in range(0, self.n_spheres):
@@ -178,12 +214,113 @@ class Scene:
         self.sphere[self.n_spheres] = Sphere(pos, vel, acc, mass, radius)
         self.n_spheres += 1
 
-    def set_plane(self):
-        pass
+        #demo
+        #self.l_sphere = list(self.sphere)
+
+    def vel_relative(self, normal, contact, i, j):
+        return   (normal.x * (self.sphere[i].vel.x - self.sphere[j].vel.x) +
+                  normal.y * (self.sphere[i].vel.y - self.sphere[j].vel.y))
+
+
+    # TODO: добавить position_based подход
+    # TODO: добавить алгоритмы генерации сцены
+
+
+    #На взод принимает массив индексов сфер из дереве всех сфер
+    #То есть те которые будем обрабатывать
+    #На выходе список из кортежей пар индексов
+    #(пока что проходит просто по дереву)
+
+    """
+    self.sphere[col_spheres[i][0]] - second sphere in colision number i
+    self.sphere[col_spheres[i][0]] - first sphere in colision number i
+    принимает лист из пар индексов
+    """
+#
+    def collision_detection_spheres(self, dt):
+        col_spheres = []
+        for i in range(0, self.n_spheres-1 ):
+            for j in range(i + 1, self.n_spheres):
+
+                pos_ex_i, pos_ex_j = self.sphere[i].pos, self.sphere[j].pos
+                vel_ex_i, vel_ex_j = self.sphere[i].vel, self.sphere[j].vel
+                acc_ex_i, acc_ex_j = self.sphere[i].acc, self.sphere[j].acc
+                self.sphere[i].update(dt)
+                if (abs(  self.sphere[i].pos - self.sphere[j].pos  ) < (self.sphere[i].radius + self.sphere[j].radius)):
+                    self.depth.append( (self.sphere[i].radius + self.sphere[j].radius) - abs(  self.sphere[i].pos - self.sphere[j].pos  ))
+                    self.sphere[i](pos_ex_i, vel_ex_i, acc_ex_i)
+                    self.sphere[j](pos_ex_j, vel_ex_j, acc_ex_j)
+                    col_spheres.append((i, j))
+                else:
+                    self.sphere[i](pos_ex_i, vel_ex_i, acc_ex_i)
+                    self.sphere[j](pos_ex_j, vel_ex_j, acc_ex_j)
+
+                    #print('Crash')
+        return col_spheres
+
+    def calculate_normal (self, i, j):
+        n = self.sphere[i].pos - self.sphere[j].pos
+        n.norm()
+        return n
+
+    def calculate_contact(self, i, j):
+        r1, r2 = self.sphere[i].radius, self.sphere[j].radius
+
+        if (self.sphere[i].pos.x < self.sphere[j].pos.x):
+            return self.sphere[i].pos + (r1 / (r1 + r2)) * (self.sphere[j].pos - self.sphere[i].pos)
+        else:
+            return self.sphere[j].pos + (r2 / (r1 + r2)) * (self.sphere[i].pos - self.sphere[j].pos)
+
+
+    def calculate_impulse(self, normal, contact, i, j ):
+        R1 = contact - self.sphere[i].pos
+        R2 = contact - self.sphere[j].pos
+        MIN_V = 8
+        E = 1
+        #Z1 = normal.сross_product(R1) * self.sphere[i].imass
+        #Z2 = normal.сross_product(R2) * self.sphere[j].imass
+
+        J = ( normal.x * (normal.x * self.sphere[i].imass + normal.x * self.sphere[j].imass)
+              + normal.y * (normal.y * self.sphere[i].imass + normal.y * self.sphere[j].imass) )
+        return ( MIN_V - (1 + E) * self.vel_relative(normal,contact, i, j) ) / J
+
+    def colision_response_spheres(self, col_spheres, dt):
+        for i in range(0, len(col_spheres)):
+            m1 = self.sphere[col_spheres[i][0]].mass
+            m2 = self.sphere[col_spheres[i][1]].mass
+            #print (col_spheres[i][0], col_spheres[i][1])
+
+            #self.sphere[col_spheres[i][0]].vel = (self.sphere[col_spheres[i][0]].vel * (m1 - m2) + (2 * m2 * self.sphere[col_spheres[i][1]].vel))/(m1 + m2)
+            #self.sphere[col_spheres[i][1]].vel = -(self.sphere[col_spheres[i][1]].vel * (m2 - m1) + (2 * m1 * self.sphere[col_spheres[i][0]].vel))/(m1 + m2)
+
+            contact = self.calculate_contact(col_spheres[i][0], col_spheres[i][1])
+            normal =  self.calculate_normal(col_spheres[i][0], col_spheres[i][1])
+            impulse = self.calculate_impulse(normal, contact, col_spheres[i][0], col_spheres[i][1])
+            self.sphere[col_spheres[i][0]].apply_impulse(contact, normal, impulse)
+            self.sphere[col_spheres[i][1]].apply_impulse(contact, normal, -impulse)
+            print ("")
+
+            #self.sphere[col_spheres[i][0]].update_pos(dt)
+            #self.sphere[col_spheres[i][1]].update_pos(dt)
+
+            while (abs(self.sphere[col_spheres[i][0]].pos - self.sphere[col_spheres[i][1]].pos) <
+                       (self.sphere[col_spheres[i][0]].radius + self.sphere[col_spheres[i][1]].radius)):
+                self.sphere[col_spheres[i][0]].update_pos(dt)
+                self.sphere[col_spheres[i][1]].update_pos(dt)
+
+            self.sphere[col_spheres[i][0]].update(dt)
+            self.sphere[col_spheres[i][1]].update(dt)
+
 
     def update(self, dt):
         for i in range(0, self.n_spheres):
             self.sphere[i].update(dt)
+
+            #if (self.collision_detection() != False):
+
+    def set_plane(self):
+        pass
+
 
 
 
