@@ -3,6 +3,10 @@ import math
 import engine
 import random as rnd
 
+import tkinter as tk
+from tkinter import *
+import os
+
 
 class Rect:
     def __init__(self, left, top, right, bottom):
@@ -193,11 +197,11 @@ class Game:
         self._running = True
         self._pause = False
 
-        #self.show_vel_vector = False
+        # self.show_vel_vector = False
         self.size = self.width, self.height = 800, 600
         self.screen = pygame.display.set_mode(self.size, pygame.HWSURFACE)
         self.font = pygame.font.init()
-        self.font = pygame.font.SysFont('mono', self.height//30, bold=True)
+        self.font = pygame.font.SysFont('mono', self.height // 30, bold=True)
         self.background = pygame.Surface(self.screen.get_size()).convert()
         self.fps = 50
         self.playtime = 0.0
@@ -210,17 +214,17 @@ class Game:
         self.world = World()
 
         rnd.seed()
-        self.number_speres = 5 #default
+        self.number_speres = 5  # default
 
         self.scene = GScene(self.width, self.height)
 
-        #TODO: перегрузить вызов Scene
+        # TODO: перегрузить вызов Scene
 
         for i in range(0, self.number_speres):
             self.scene.add_sphere(engine.Vector2D(rnd.randint(10, self.width - 10),
                                                   rnd.randint(10, self.height - 10)),
-                                  engine.Vector2D(rnd.randint(100, 500),
-                                                  rnd.randint(100, 500)),
+                                  engine.Vector2D(rnd.randint(-500, 500),
+                                                  rnd.randint(-500, 500)),
                                   engine.Vector2D(0, 0), 1, 50)
             self.scene.sphere_color[i] = (rnd.randint(0, 255),
                                           rnd.randint(0, 255),
@@ -261,7 +265,7 @@ class Game:
 
     def handle_event(self, event):
         """Handling one pygame event"""
-        #print(pygame.event.event_name(event.type))
+        #print(pygame.event.eveSnt_name(event.type))
 
         if event.type == pygame.QUIT:
             # close window event
@@ -318,9 +322,6 @@ class Game:
                                             self.scene.sphere[i].vel)
                     i = False
 
-
-
-
         if event.type == pygame.MOUSEBUTTONDOWN:
             """Right mouse button down - create new sphere"""
 
@@ -333,8 +334,8 @@ class Game:
             if (pygame.mouse.get_pressed() == (0, 0, 1)):
                 self.pos = pygame.mouse.get_pos()
                 self.scene.add_sphere(engine.Vector2D(*self.pos),
-                                          engine.Vector2D(rnd.randint(100, 500),
-                                                          rnd.randint(100, 500)),
+                                          engine.Vector2D(rnd.randint(-500, 500),
+                                                          rnd.randint(-500, 500)),
                                           engine.Vector2D(0, 0), 1, 50)
                 self.scene.sphere_color[self.scene.n_spheres-1] = (rnd.randint(0, 255),
                                               rnd.randint(0, 255),
@@ -392,18 +393,18 @@ class Game:
                 self.world.update(Frame(pygame.key.get_pressed(), dt))
                 self.playtime += dt
             self.world.render(self.canvas)
-            #print( self.clock.get_fps() )
 
-            self.scene.calculate_momentum()
-            self.scene.calculate_energy()
+
             self.draw_text("FPS: %6.3f  PLAYTIME: %6.3f SECONDS" %(self.clock.get_fps(), self.playtime),
                            (self.font.get_linesize(), self.height - self.font.get_linesize()*3))
-            self.draw_text("MOMENTUM: %6.3f  ENERGY: %6.3f " %(abs(self.scene.calculate_momentum()), self.scene.energy),
+            self.draw_text("MOMENTUM: %6.3f  ENERGY: %6.3f " %(abs(self.scene.calculate_momentum()), self.scene.calculate_energy()),
                            (self.font.get_linesize(), self.height - self.font.get_linesize() *2))
             self.draw_text("NUMBER OF SPHERES: %6d " % (self.scene.n_spheres),
                            (self.font.get_linesize(), self.height - self.font.get_linesize() * 1))
+
             self.scene.momentum = engine.Vector2D(0, 0)
             self.scene.energy = 0
+
             self.flip()
 
         self.cleanup()
