@@ -22,10 +22,11 @@ class GScene(engine.Scene):
     def __init__(self):
         super(GScene, self).__init__()
         self.sphere_color = {}
+        self.vel_vector = {}
         print('Create')
 
     def handle_border(self, rect=Rect(0, 0, 800, 600)):
-        for i in range(0, self.n_spheres):
+        for i in self.sphere:
             if self.sphere[i].pos.x - self.sphere[i].radius < rect.left:
                 if self.sphere[i].vel.x < 0:
                     self.sphere[i].vel.x = -self.sphere[i].vel.x
@@ -60,11 +61,17 @@ class GScene(engine.Scene):
 
     def render(self, canvas):
         """Draw Player on the Game window"""
-        for i in range(0, self.n_spheres):
+        for i in self.sphere:
             canvas.circle(self.sphere_color[i],
                           self.sphere[i].pos.intpair(),
                           self.sphere[i].radius)
 
+    def in_sphere(self, pos):
+        for i in self.sphere:
+            if abs(self.sphere[i].pos - engine.Vector2D(*pos)) <= self.sphere[i].radius:
+                return i
+
+        return False
     #def generate_scene_none_intersects(self):
 
      #   for i in range (0, self.n_spheres):
@@ -103,6 +110,7 @@ class Game:
     def __init__(self):
         self._running = True
         self._pause = False
+        self.show_vel_vector = False
         self.size = self.width, self.height = 800, 600
         self.screen = pygame.display.set_mode(self.size, pygame.HWSURFACE)
         self.font = pygame.font.init()
@@ -119,7 +127,7 @@ class Game:
         self.world = World()
 
         rnd.seed()
-        self.number_speres = 200 #default
+        self.number_speres = 10 #default
 
         self.scene = GScene()
 
@@ -130,7 +138,7 @@ class Game:
                                                   rnd.randint(10, self.height - 10)),
                                   engine.Vector2D(rnd.randint(100, 500),
                                                   rnd.randint(100, 500)),
-                                  engine.Vector2D(0, 0), 1, 10)
+                                  engine.Vector2D(0, 0), 1, 50)
             self.scene.sphere_color[i] = (rnd.randint(0, 255),
                                           rnd.randint(0, 255),
                                           rnd.randint(0, 255))
@@ -174,8 +182,55 @@ class Game:
                     self._pause = False
                 else:
                     self._pause = True
-        if event.type == pygame.mouse.get_pressed():
-            print ('lol')
+
+            if event.key == pygame.K_LCTRL:
+                self.show_vel_vector = True
+
+            if event.key == pygame.K_DELETE:
+                self.pos = pygame.mouse.get_pos()
+                i = self.scene.in_sphere(self.pos)
+                if i is not False:
+                    self.scene.delete_sphere(i)
+                    i = False
+
+        if event.type == pygame.MOUSEMOTION:
+            """Left mouse button down + motion"""
+            #print (pygame.mouse.get_pressed())
+            if (pygame.mouse.get_pressed() == (1,0,0)):
+                self.pos = pygame.mouse.get_pos()
+                i = self.scene.in_sphere(self.pos)
+                if i is not False:
+                    self.scene.sphere[i].set_pos(self.pos)
+                    i = False
+
+
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            """Right mouse button down - create new sphere"""
+
+            if (pygame.mouse.get_pressed() == (1, 0, 0)):
+                self.pos = pygame.mouse.get_pos()
+                i = self.scene.in_sphere(self.pos)
+                print(i)
+            if (pygame.mouse.get_pressed() == (0, 0, 1)):
+                self.pos = pygame.mouse.get_pos()
+                self.scene.add_sphere(engine.Vector2D(*self.pos),
+                                          engine.Vector2D(rnd.randint(100, 500),
+                                                          rnd.randint(100, 500)),
+                                          engine.Vector2D(0, 0), 1, 50)
+                self.scene.sphere_color[self.scene.n_spheres-1] = (rnd.randint(0, 255),
+                                              rnd.randint(0, 255),
+                                              rnd.randint(0, 255))
+            """wheel mouse"""
+            if (pygame.mouse.get_pressed() == (0, 0, 0)):
+                self.pos = pygame.mouse.get_pos()
+                i = self.scene.in_sphere(self.pos)
+                if i is not False:
+                    if (event.button == 4):
+                        self.scene.sphere[i].radius += 2
+                    if (event.button == 5):
+                        self.scene.sphere[i].radius -= 2
+                    i = False
 
     def cleanup(self):
         """Cleanup the Game"""

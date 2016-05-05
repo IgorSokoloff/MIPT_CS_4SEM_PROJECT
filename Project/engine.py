@@ -145,6 +145,12 @@ class Sphere(RigidBody):
     def get_potencial_energy(self):
         pass
 
+    def set_pos (self, new_pos):
+        if type(new_pos) is Vector2D:
+            self.pos.x = new_pos.x
+            self.pos.y = new_pos.y
+        if type(new_pos) is tuple:
+            self.pos.x, self.pos.y = new_pos
     #self < other
     def __lt__(self, other):
         return self.radius < other.radius
@@ -217,7 +223,7 @@ class Scene:
 
     def __str__(self):
         str_out = ''
-        for i in range(0, self.n_spheres):
+        for i in self.sphere:
             str_out +=  i.__repr__() +' ' + self.sphere[i].__repr__() + '\n'
         return str_out
 
@@ -225,9 +231,11 @@ class Scene:
     def add_sphere(self, pos, vel=Vector2D(0, 0), acc=Vector2D(0, 0), mass=1, radius=10):
         self.sphere[self.n_spheres] = Sphere(pos, vel, acc, mass, radius)
         self.n_spheres += 1
+    """Delete the sphere from a dictionary by key"""
 
-        # demo
-        # self.l_sphere = list(self.sphere)
+    def delete_sphere(self, i):
+        self.sphere.pop(i)
+        self.n_spheres -= 1
 
     def vel_relative(self, normal, contact, i, j):
         return   (normal.x * (self.sphere[i].vel.x - self.sphere[j].vel.x) +
@@ -250,26 +258,17 @@ class Scene:
 #
     def collision_detection_spheres(self, dt):
         col_spheres = []
-        for i in range(0, self.n_spheres - 1 ):
-            for j in range(i + 1, self.n_spheres):
-
-                pos_ex_i, pos_ex_j = self.sphere[i].pos, self.sphere[j].pos
-                vel_ex_i, vel_ex_j = self.sphere[i].vel, self.sphere[j].vel
-                acc_ex_i, acc_ex_j = self.sphere[i].acc, self.sphere[j].acc
-                #self.sphere[i].update(dt)
-                depth = ((self.sphere[i].radius + self.sphere[j].radius) - abs(self.sphere[i].pos - self.sphere[j].pos))
+        l_i_s = list(self.sphere.keys()) # list_i_)spheres
+        d_i_s = {i:l_i_s[i] for i in range(len(l_i_s))}# dict_i_spheres
+        
+        for i in d_i_s:
+            for j in l_i_s[i+1:]:
+                depth = ((self.sphere[d_i_s[i]].radius + self.sphere[j].radius) - abs(self.sphere[d_i_s[i]].pos - self.sphere[j].pos))
                 if ( depth >= 0 ):
                     """Then collision"""
-                    normal = self.calculate_normal(i,j)
+                    normal = self.calculate_normal(d_i_s[i],j)
                     self.sphere[j].pos += abs(depth + 2)*normal
-                    #self.sphere[i](pos_ex_i, vel_ex_i, acc_ex_i)
-                    #self.sphere[j](pos_ex_j, vel_ex_j, acc_ex_j)
-                    col_spheres.append((i, j))
-
-                    #self.sphere[i](pos_ex_i, vel_ex_i, acc_ex_i)
-                    #self.sphere[j](pos_ex_j, vel_ex_j, acc_ex_j)
-
-                    #print('Crash')
+                    col_spheres.append((d_i_s[i], j))
         return col_spheres
 
     def calculate_normal (self, i, j):
@@ -327,7 +326,7 @@ class Scene:
 
 
     def update(self, dt):
-        for i in range(0, self.n_spheres):
+        for i in self.sphere:
             self.sphere[i].update(dt)
 
     def impulse (self):
@@ -348,10 +347,3 @@ class Scene:
 
     def set_plane(self):
         pass
-
-
-
-
-class Cell:
-    pass
-
