@@ -69,29 +69,41 @@ class GScene(engine.Scene):
     def handle_border(self):
         self.rect.momentum = engine.Vector2D(0, 0)
         for i in self.sphere:
+            """left"""
             if self.sphere[i].pos.x - self.sphere[i].radius < self.rect.left:
                 if self.sphere[i].vel.x < 0:
+                    depth = abs(self.rect.left - (self.sphere[i].pos.x - self.sphere[i].radius))
+                    self.sphere[i].pos.x += depth
                     p_prev = self.sphere[i].get_momentum()
                     self.sphere[i].vel.x = -self.sphere[i].vel.x
                     self.rect.momentum += ( p_prev-self.sphere[i].get_momentum())
                     self.sphere[i].pos.x = self.rect.left + self.sphere[i].radius
 
+            """top"""
             if self.sphere[i].pos.y - self.sphere[i].radius < self.rect.top:
                 if self.sphere[i].vel.y < 0:
+                    depth = abs(self.rect.top - (self.sphere[i].pos.y - self.sphere[i].radius))
+                    self.sphere[i].pos.y += depth
                     p_prev = self.sphere[i].get_momentum()
                     self.sphere[i].vel.y = -self.sphere[i].vel.y
                     self.rect.momentum += ( p_prev - self.sphere[i].get_momentum())
                     self.sphere[i].pos.y = self.rect.top + self.sphere[i].radius
 
+            """right"""
             if self.sphere[i].pos.x + self.sphere[i].radius > self.rect.right:
                 if self.sphere[i].vel.x > 0:
+                    depth = abs(self.sphere[i].pos.x + self.sphere[i].radius - self.rect.right)
+                    self.sphere[i].pos.x -= depth
                     p_prev = self.sphere[i].get_momentum()
                     self.sphere[i].vel.x = -self.sphere[i].vel.x
                     self.rect.momentum += ( p_prev - self.sphere[i].get_momentum())
-                    self.sphere[i].pos.x = self.rect.right - self.sphere[i].radius;
+                    self.sphere[i].pos.x = self.rect.right - self.sphere[i].radius
 
+            """bottom"""
             if self.sphere[i].pos.y + self.sphere[i].radius > self.rect.bottom:
                 if self.sphere[i].vel.y > 0:
+                    depth = abs(self.sphere[i].pos.y + self.sphere[i].radius - self.rect.bottom)
+                    self.sphere[i].pos.y -= depth
                     p_prev = self.sphere[i].get_momentum()
                     self.sphere[i].vel.y = -self.sphere[i].vel.y
                     self.rect.momentum += ( p_prev - self.sphere[i].get_momentum())
@@ -249,6 +261,8 @@ class Game:
 
     def handle_event(self, event):
         """Handling one pygame event"""
+        #print(pygame.event.event_name(event.type))
+
         if event.type == pygame.QUIT:
             # close window event
             self.exit()
@@ -313,7 +327,9 @@ class Game:
             if (pygame.mouse.get_pressed() == (1, 0, 0)):
                 self.pos = pygame.mouse.get_pos()
                 i = self.scene.in_sphere(self.pos)
-                print(self.scene.sphere[i])
+                if i is not False:
+                    print(self.scene.sphere[i])
+                i = False
             if (pygame.mouse.get_pressed() == (0, 0, 1)):
                 self.pos = pygame.mouse.get_pos()
                 self.scene.add_sphere(engine.Vector2D(*self.pos),
@@ -335,12 +351,16 @@ class Game:
                 self.pos = pygame.mouse.get_pos()
                 i = self.scene.in_sphere(self.pos)
                 if i is not False:
+                    """up"""
                     if (event.button == 4):
                         self.scene.sphere[i].radius += 2
+                    """down"""
                     if (event.button == 5):
                         self.scene.sphere[i].radius -= 2
                     i = False
 
+        #if event.type[0] == :
+            #pass
     def cleanup(self):
         """Cleanup the Game"""
         pygame.quit()
