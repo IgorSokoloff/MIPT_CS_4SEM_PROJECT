@@ -17,7 +17,17 @@ class Vector2D:
     def norm(self):
         self.x = self.x / abs(self)
         self.y = self.y / abs(self)
-    """
+
+    def cross(self):
+        return Vector2D(-self.y, self.x)
+
+    def rotate(self, angle):
+        a0 = math.atan2(self.x, self.y)
+        xx = self.x * math.cos(angle) - self.y * math.sin(angle)
+        yy = self.y * math.cos(angle) + self.x * math.sin(angle)
+        return Vector2D(xx, yy)
+
+        """
     It returns scalar
     @param: other - Vector2D
     """
@@ -139,7 +149,7 @@ class Sphere(RigidBody):
         return (0.5) * self.mass * abs(self.vel)**2
 
     """Returns Vector2D impulse"""
-    def get_impulse(self):
+    def get_momentum(self):
         return self.mass * self.vel
 
     def get_potencial_energy(self):
@@ -179,7 +189,7 @@ class Sphere(RigidBody):
         return 'Shere2D({}, {}, {}, {}, {} )'.format(self.pos, self.vel, self.acc, self.mass, self.radius)
 
     def __str__(self):
-        return '({}, {}, {}, {}, {})'.format(self.pos, self.vel, self.acc, self.mass, self.radius)
+        return '(pos{},\n vel{},\n acc{},\n mass: {},\n radius: {},\n dencity: {})'.format(self.pos, self.vel, self.acc, self.mass, self.radius, self.dencity)
 
     def __call__(self, pos, vel, acc):
         self.pos, self.vel, self.acc = pos, vel, acc
@@ -218,6 +228,9 @@ class Scene:
         self.sphere = {}
 
         self.depth = []
+        self.momentum = Vector2D(0, 0)
+
+        self.energy = 0
         # array of index
         # self.l_sphere = []
 
@@ -329,17 +342,21 @@ class Scene:
         for i in self.sphere:
             self.sphere[i].update(dt)
 
-    def impulse (self):
+    """Returns Vector2D sum momentum of system"""
+    def calculate_momentum (self):
         sum = Vector2D(0,0)
         for i in self.sphere:
-            sum += self.sphere[i].get_impulse()
-        return abs(sum)
+            sum += self.sphere[i].get_momentum()
+        self.momentum = sum
+        return sum
 
-    def energy(self):
+    def calculate_energy(self):
         sum = 0
         for i in self.sphere:
             sum += self.sphere[i].get_kinetic_energy()
+        self.energy = sum
         return sum
+
 
 
     #def
