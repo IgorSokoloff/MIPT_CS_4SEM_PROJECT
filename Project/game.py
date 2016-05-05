@@ -54,8 +54,7 @@ class GScene(engine.Scene):
         #f *= self.a
         self.handle_border()
         self.update(frame.dt)
-        self.colision_response_spheres(self.collision_detection_spheres(frame.dt), frame.dt)
-
+        self.collision_response_spheres(self.collision_detection_spheres(frame.dt), frame.dt)
 
 
 
@@ -103,11 +102,14 @@ class Game:
     #self.world.addUnit(Player(pos=(50, 50), rect=Rect(0, 0, self.width, self.height)))
     def __init__(self):
         self._running = True
+        self._pause = False
         self.size = self.width, self.height = 800, 600
         self.screen = pygame.display.set_mode(self.size, pygame.HWSURFACE)
-
+        self.font = pygame.font.init()
+        self.font = pygame.font.SysFont('mono', self.height//30, bold=True)
+        self.background = pygame.Surface(self.screen.get_size()).convert()
         self.fps = 50
-
+        self.playtime = 0.0
         pygame.display.set_caption('Game')
 
         self.clock = pygame.time.Clock()
@@ -117,28 +119,28 @@ class Game:
         self.world = World()
 
         rnd.seed()
-        self.number_speres = 5 #default
+        self.number_speres = 200 #default
 
         self.scene = GScene()
 
         #TODO: перегрузить вызов Scene
 
-        """for i in range(0, self.number_speres):
+        for i in range(0, self.number_speres):
             self.scene.add_sphere(engine.Vector2D(rnd.randint(10, self.width - 10),
                                                   rnd.randint(10, self.height - 10)),
-                                  engine.Vector2D(rnd.randint(400, 500),
-                                                  rnd.randint(700, 800)),
-                                  engine.Vector2D(0, 0), 1, 50)
+                                  engine.Vector2D(rnd.randint(100, 500),
+                                                  rnd.randint(100, 500)),
+                                  engine.Vector2D(0, 0), 1, 10)
             self.scene.sphere_color[i] = (rnd.randint(0, 255),
                                           rnd.randint(0, 255),
-                                          rnd.randint(0, 255))"""
+                                          rnd.randint(0, 255))
 
-        self.scene.add_sphere(engine.Vector2D(100, 100),
-                              engine.Vector2D(600, 0),
+        """self.scene.add_sphere(engine.Vector2D(100, 200),
+                              engine.Vector2D(400, 0),
                               engine.Vector2D(0, 0), 1, 50)
 
-        self.scene.add_sphere(engine.Vector2D(500, 140),
-                              engine.Vector2D(0, 0),
+        self.scene.add_sphere(engine.Vector2D(700, 220),
+                              engine.Vector2D(-50, 0),
                               engine.Vector2D(0, 0), 1, 50)
 
         self.scene.sphere_color[0] = (rnd.randint(0, 255),
@@ -147,7 +149,7 @@ class Game:
 
         self.scene.sphere_color[1] = (rnd.randint(0, 255),
                                     rnd.randint(0, 255),
-                                    rnd.randint(0, 255))
+                                    rnd.randint(0, 255))"""
 
         self.world.addUnit(self.scene)
 
@@ -162,10 +164,18 @@ class Game:
         if event.type == pygame.QUIT:
             # close window event
             self.exit()
-        elif event.type == pygame.KEYDOWN:
+        if event.type == pygame.KEYDOWN:
             # keyboard event on press ESC
             if event.key == pygame.K_ESCAPE:
                 self.exit()
+
+            if event.key == pygame.K_SPACE:
+                if self._pause is True:
+                    self._pause = False
+                else:
+                    self._pause = True
+        if event.type == pygame.mouse.get_pressed():
+            print ('lol')
 
     def cleanup(self):
         """Cleanup the Game"""
@@ -174,7 +184,17 @@ class Game:
     def flip(self):
 
         pygame.display.flip()
-        self.clock.tick(self.fps)
+        #self.clock.tick(self.fps)
+        self.screen.blit(self.background, (0, 0))
+
+    def draw_text(self, text, coord):
+        """Center text in window.
+        """
+        fw, fh = self.font.size(text)
+        surface = self.font.render(text, True, (0, 255, 0))
+        #self.screen.blit(surface, ((self.width - fw) // 2, (self.height - fh) // 2))
+
+        self.screen.blit(surface, coord)
 
     def execute(self):
         """Execution loop of the game"""
@@ -184,10 +204,16 @@ class Game:
                 self.handle_event(event)
 
             dt = self.clock.tick(self.fps) / 1000.0
-            self.world.update(Frame(pygame.key.get_pressed(), dt))
+            if self._pause is False:
+                self.world.update(Frame(pygame.key.get_pressed(), dt))
+                self.playtime += dt
             self.world.render(self.canvas)
-
             #print( self.clock.get_fps() )
+
+            self.draw_text("FPS: %6.3f  PLAYTIME: %6.3f SECONDS" %(self.clock.get_fps(), self.playtime),
+                           (self.font.get_linesize(), self.height - self.font.get_linesize()*2))
+            self.draw_text("IMPULSE: %6.3f  ENERGY: %6.3f " %(self.scene.impulse(), self.scene.energy()),
+                           (self.font.get_linesize(), self.height - self.font.get_linesize() *1))
 
             self.flip()
 
