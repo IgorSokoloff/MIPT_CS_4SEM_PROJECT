@@ -196,6 +196,12 @@ class Game:
     def __init__(self):
         self._running = True
         self._pause = False
+        self.key_r_pressed = False
+        self.key_v_pressed = False
+        self.key_a_pressed = False
+        self.key_m_pressed = False
+        self.key_f_pressed = False
+
 
         # self.show_vel_vector = False
         self.size = self.width, self.height = 800, 600
@@ -205,6 +211,7 @@ class Game:
         self.background = pygame.Surface(self.screen.get_size()).convert()
         self.fps = 50
         self.playtime = 0.0
+
         pygame.display.set_caption('Game')
 
         self.clock = pygame.time.Clock()
@@ -214,7 +221,7 @@ class Game:
         self.world = World()
 
         rnd.seed()
-        self.number_speres = 5  # default
+        self.number_speres = 2  # default
 
         self.scene = GScene(self.width, self.height)
 
@@ -225,7 +232,9 @@ class Game:
                                                   rnd.randint(10, self.height - 10)),
                                   engine.Vector2D(rnd.randint(-500, 500),
                                                   rnd.randint(-500, 500)),
-                                  engine.Vector2D(0, 0), 1, 50)
+                                  engine.Vector2D(0, 0),
+                                  rnd.randint(1, 10),
+                                  rnd.randint(20, 80))
             self.scene.sphere_color[i] = (rnd.randint(0, 255),
                                           rnd.randint(0, 255),
                                           rnd.randint(0, 255))
@@ -237,24 +246,6 @@ class Game:
                                   255 - self.scene.sphere_color[i][1],
                                   255 - self.scene.sphere_color[i][2])
                                  )
-
-
-        """self.scene.add_sphere(engine.Vector2D(100, 200),
-                              engine.Vector2D(400, 0),
-                              engine.Vector2D(0, 0), 1, 50)
-
-        self.scene.add_sphere(engine.Vector2D(700, 220),
-                              engine.Vector2D(-50, 0),
-                              engine.Vector2D(0, 0), 1, 50)
-
-        self.scene.sphere_color[0] = (rnd.randint(0, 255),
-                                          rnd.randint(0, 255),
-                                          rnd.randint(0, 255))
-
-        self.scene.sphere_color[1] = (rnd.randint(0, 255),
-                                    rnd.randint(0, 255),
-                                    rnd.randint(0, 255))"""
-
         self.world.addUnit(self.scene)
 
 
@@ -281,8 +272,7 @@ class Game:
                 else:
                     self._pause = True
 
-            if event.key == pygame.K_LCTRL:
-                pass#self.show_vel_vector = True
+
 
             if event.key == pygame.K_DELETE:
                 self.pos = pygame.mouse.get_pos()
@@ -299,7 +289,7 @@ class Game:
                 else:
                     self.scene.border_active = True
 
-            if event.key == pygame.K_a:
+            if event.key == pygame.K_LCTRL:
                 for i in self.scene.sphere:
                     self.scene.vel_arrow[i](self.scene.sphere[i].pos, self.scene.sphere[i].vel)
                 if self.scene.arrow_enable is True:
@@ -307,6 +297,38 @@ class Game:
                 else:
                     self.scene.arrow_enable = True
 
+            if event.key == pygame.K_r:
+                #print("key r pressed")
+                self.key_r_pressed = True
+
+            if event.key == pygame.KMOD_LCTRL:
+                self.key_lctrl_pressed = True
+
+            if event.key == pygame.K_v:
+                self.key_v_pressed = True
+
+            if event.key == pygame.K_f:
+                self.key_f_pressed = True
+
+            if event.key == pygame.K_m:
+                self.key_m_pressed = True
+
+
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_r:
+                self.key_r_pressed = False
+
+            if event.key == pygame.K_a:
+                self.key_a_pressed = False
+
+            if event.key == pygame.K_v:
+                self.key_v_pressed = False
+
+            if event.key == pygame.K_f:
+                self.key_f_pressed = False
+
+            if event.key == pygame.K_m:
+                self.key_m_pressed = False
 
         if event.type == pygame.MOUSEMOTION:
             """Left mouse button down + motion"""
@@ -334,9 +356,11 @@ class Game:
             if (pygame.mouse.get_pressed() == (0, 0, 1)):
                 self.pos = pygame.mouse.get_pos()
                 self.scene.add_sphere(engine.Vector2D(*self.pos),
-                                          engine.Vector2D(rnd.randint(-500, 500),
+                                      engine.Vector2D(rnd.randint(-500, 500),
                                                           rnd.randint(-500, 500)),
-                                          engine.Vector2D(0, 0), 1, 50)
+                                      engine.Vector2D(0, 0),
+                                      rnd.randint(1, 20),
+                                      rnd.randint(20, 80))
                 self.scene.sphere_color[self.scene.n_spheres-1] = (rnd.randint(0, 255),
                                               rnd.randint(0, 255),
                                               rnd.randint(0, 255))
@@ -349,16 +373,34 @@ class Game:
                                      )
             """wheel mouse"""
             if (pygame.mouse.get_pressed() == (0, 0, 0)):
-                self.pos = pygame.mouse.get_pos()
-                i = self.scene.in_sphere(self.pos)
-                if i is not False:
-                    """up"""
-                    if (event.button == 4):
-                        self.scene.sphere[i].radius += 2
-                    """down"""
-                    if (event.button == 5):
-                        self.scene.sphere[i].radius -= 2
-                    i = False
+                """radius"""
+                if (self.key_r_pressed is True):
+                    self.pos = pygame.mouse.get_pos()
+                    i = self.scene.in_sphere(self.pos)
+                    if i is not False:
+                        """up"""
+                        if (event.button == 4):
+                            self.scene.sphere[i].set_radius(self.scene.sphere[i].radius + 2)
+                        """down"""
+                        if (event.button == 5):
+                            self.scene.sphere[i].set_radius(self.scene.sphere[i].radius - 2)
+
+                        i = False
+
+                """mass"""
+                if (self.key_m_pressed is True):
+                    self.pos = pygame.mouse.get_pos()
+                    i = self.scene.in_sphere(self.pos)
+                    if i is not False:
+                        """up"""
+                        if (event.button == 4):
+                            self.scene.sphere[i].set_mass(self.scene.sphere[i].mass + 2)
+                            #self.scene.sphere[i].get_kinetic_energy()
+                        """down"""
+                        if (event.button == 5):
+                            self.scene.sphere[i].set_mass(self.scene.sphere[i].mass - 2)
+                            #self.scene.sphere[i].get_kinetic_energy()
+                        i = False
 
         #if event.type[0] == :
             #pass
@@ -402,8 +444,8 @@ class Game:
             self.draw_text("NUMBER OF SPHERES: %6d " % (self.scene.n_spheres),
                            (self.font.get_linesize(), self.height - self.font.get_linesize() * 1))
 
-            self.scene.momentum = engine.Vector2D(0, 0)
-            self.scene.energy = 0
+            #self.scene.momentum = engine.Vector2D(0, 0)
+            #self.scene.energy = 0
 
             self.flip()
 
