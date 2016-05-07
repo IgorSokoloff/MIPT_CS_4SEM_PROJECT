@@ -17,6 +17,7 @@ class Vector2D:
     def norm(self):
         self.x = self.x / abs(self)
         self.y = self.y / abs(self)
+        return Vector2D(self.x, self.y)
 
     def cross(self):
         return Vector2D(-self.y, self.x)
@@ -142,7 +143,36 @@ class Sphere(RigidBody):
     def __init__(self,  pos, vel=Vector2D(0, 0), acc=Vector2D(0, 0), mass=1, radius=10):
         super(Sphere, self).__init__(pos, vel, acc, mass)
         self.radius = radius
-        self.dencity = mass/(math.pi*self.radius**2)
+        self.volume = (4 / 3) * math.pi * self.radius ** 3
+        self.dencity = self.mass/self.volume
+
+    def set_volume (self):
+        self.volume = (4 / 3) * math.pi * self.radius ** 3
+
+    def set_radius(self, new_radius, const_dencity=True):
+        self.radius = new_radius
+        self.set_volume()
+        if const_dencity is True:
+            self.mass = self.dencity * self.volume
+            self.imass = 1/self.mass
+        else:
+            self.dencity = self.mass / self.volume
+
+
+    def set_mass(self, new_mass, const_dencity=False):
+        if new_mass <= 0:
+            new_mass = 0.1
+        self.mass = new_mass
+        self.imass = 1/self.mass
+        if const_dencity is False:
+            self.dencity = self.mass / self.volume
+        else:
+            self.volume = self.mass / self.dencity
+            self.radius = ((3 / 4) * self.volume / math.pi) ** (1 / 3)
+
+
+    def set_dencity(self):
+        pass
 
 
     def get_kinetic_energy(self):
@@ -161,6 +191,7 @@ class Sphere(RigidBody):
             self.pos.y = new_pos.y
         if type(new_pos) is tuple:
             self.pos.x, self.pos.y = new_pos
+
     #self < other
     def __lt__(self, other):
         return self.radius < other.radius
@@ -189,7 +220,7 @@ class Sphere(RigidBody):
         return 'Shere2D({}, {}, {}, {}, {} )'.format(self.pos, self.vel, self.acc, self.mass, self.radius)
 
     def __str__(self):
-        return '(pos{},\n vel{},\n acc{},\n mass: {},\n radius: {},\n dencity: {})'.format(self.pos, self.vel, self.acc, self.mass, self.radius, self.dencity)
+        return '(pos{},\n vel{},\n acc{},\n mass: {},\n radius: {},\n dencity: {})\n\n'.format(self.pos, self.vel, self.acc, self.mass, self.radius, self.dencity)
 
     def __call__(self, pos, vel, acc):
         self.pos, self.vel, self.acc = pos, vel, acc
@@ -258,7 +289,7 @@ class Scene:
     # TODO: добавить position_based подход
 
 
-    #На взод принимает массив индексов сфер из дереве всех сфер
+    #На вход принимает массив индексов сфер из дереве всех сфер
     #То есть те которые будем обрабатывать
     #На выходе список из кортежей пар индексов
     #(пока что проходит просто по дереву)
@@ -303,8 +334,6 @@ class Scene:
         R2 = contact - self.sphere[j].pos
         MIN_V = 0
         E = 1
-        #Z1 = normal.сross_product(R1) * self.sphere[i].imass
-        #Z2 = normal.сross_product(R2) * self.sphere[j].imass
 
         J = (   normal.x * (normal.x * self.sphere[i].imass + normal.x * self.sphere[j].imass)
               + normal.y * (normal.y * self.sphere[i].imass + normal.y * self.sphere[j].imass) )
@@ -316,26 +345,12 @@ class Scene:
         for i in range(0, len(col_spheres)):
             m1 = self.sphere[col_spheres[i][0]].mass
             m2 = self.sphere[col_spheres[i][1]].mass
-            #print (col_spheres[i][0], col_spheres[i][1])
-
-            #self.sphere[col_spheres[i][0]].vel = (self.sphere[col_spheres[i][0]].vel * (m1 - m2) + (2 * m2 * self.sphere[col_spheres[i][1]].vel))/(m1 + m2)
-            #self.sphere[col_spheres[i][1]].vel = -(self.sphereЫ[col_spheres[i][1]].vel * (m2 - m1) + (2 * m1 * self.sphere[col_spheres[i][0]].vel))/(m1 + m2)
 
             contact = self.calculate_contact(col_spheres[i][0], col_spheres[i][1])
             normal =  self.calculate_normal(col_spheres[i][0], col_spheres[i][1])
             impulse = self.calculate_impulse(normal, contact, col_spheres[i][0], col_spheres[i][1])
             self.sphere[col_spheres[i][0]].apply_impulse(contact, normal, impulse)
             self.sphere[col_spheres[i][1]].apply_impulse(contact, normal, -impulse)
-            print ("")
-
-            #self.sphere[col_spheres[i][0]].update_pos(dt)
-
-            """while (abs(self.sphere[col_spheres[i][0]].pos - self.sphere[col_spheres[i][1]].pos) <
-                       (self.sphere[col_spheres[i][0]].radius + self.sphere[col_spheres[i][1]].radius)):
-                self.sphere[col_spheres[i][0]].update_pos(dt)
-                self.sphere[col_spheres[i][1]].update_pos(dt)"""
-            #self.sphere[col_spheres[i][0]].update(dt)
-            #self.sphere[col_spheres[i][1]].update(dt)
 
 
     def update(self, dt):
