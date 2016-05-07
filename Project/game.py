@@ -48,7 +48,6 @@ class Arrow:
                                list((self.pos + self.val / 3).intpair()),
                                ]
 
-
 """
 Derived class from Scene
 It has function for rendering
@@ -58,17 +57,42 @@ class GScene(engine.Scene):
         super(GScene, self).__init__()
         self.sphere_color = {}
         #self.vel_vector = {}
-        self.number_arrow = 0
+        self.number_vel_arrow = 0
+        self.number_acc_arrow = 0
         self.border_active = True
-        self.arrow_enable  = False
+
+        self.vel_arrow_enable  = False
+        self.acc_arrow_enable = False
+        
         self.vel_arrow = {}
+        self.acc_arrow = {}
+
         self.rect = Rect(0, 0, width, height)
         print('Create')
 
     def delete_arrow(self, i):
         self.vel_arrow.pop(i)
-        self.number_arrow -= 1
+        self.acc_arrow.pop(i)
 
+        self.number_vel_arrow -= 1
+        self.number_acc_arrow -= 1
+
+    def update_arrow_vel(self, i):
+        if self.vel_arrow_enable is True:
+            self.vel_arrow[i](self.sphere[i].pos, self.sphere[i].vel)
+
+    def update_arrow_acc(self, i):
+        if self.acc_arrow_enable is True:
+            self.acc_arrow[i](self.sphere[i].pos, self.sphere[i].acc)
+
+    def update_arrow_all(self):
+        if self.vel_arrow_enable is True:
+            for i in self.sphere:
+                self.update_arrow_vel(i)
+
+        if self.acc_arrow_enable is True:
+            for i in self.sphere:
+                self.update_arrow_acc(i)
 
     def handle_border(self):
         self.rect.momentum = engine.Vector2D(0, 0)
@@ -124,10 +148,7 @@ class GScene(engine.Scene):
 
         self.update(frame.dt)
 
-        if self.arrow_enable is True:
-            for i in self.sphere:
-                self.vel_arrow[i](self.sphere[i].pos, self.sphere[i].vel)
-
+        self.update_arrow_all()
 
         self.collision_response_spheres(self.collision_detection_spheres(frame.dt), frame.dt)
 
@@ -139,15 +160,26 @@ class GScene(engine.Scene):
             canvas.circle(self.sphere_color[i],
                           self.sphere[i].pos.intpair(),
                           self.sphere[i].radius)
-        if self.arrow_enable is True:
+
+        if self.vel_arrow_enable is True:
             for i in self.vel_arrow:
                 canvas.arrow(self.vel_arrow[i].color,
-                             self.vel_arrow[i].list_of_points
+                             self.vel_arrow[i].list_of_points, 1
                          )
 
-    def add_arrow(self, pos, vel, color):
-        self.vel_arrow[self.number_arrow] = Arrow(pos, vel, color)
-        self.number_arrow += 1
+        if self.acc_arrow_enable is True:
+            for i in self.acc_arrow:
+                canvas.arrow(self.acc_arrow[i].color,
+                             self.acc_arrow[i].list_of_points, 3
+                             )
+
+
+    def add_arrow(self, pos, vel, acc, color):
+        self.vel_arrow[self.number_vel_arrow] = Arrow(pos, vel, color)
+        self.number_vel_arrow += 1
+
+        self.acc_arrow[self.number_acc_arrow] = Arrow(pos, acc, color)
+        self.number_acc_arrow += 1
 
     def in_sphere(self, pos):
         for i in self.sphere:
@@ -171,8 +203,8 @@ class Canvas:
     def circle(self, color, pos, radius):
         pygame.draw.circle(self.screen, color, pos, radius)
 
-    def arrow (self, color, list_of_points):
-        pygame.draw.lines(self.screen, color, False, list_of_points)
+    def arrow(self, color, list_of_points, width):
+        pygame.draw.lines(self.screen, color, False, list_of_points, width)
 
 
 class World:
@@ -232,7 +264,7 @@ class Game:
                                                   rnd.randint(10, self.height - 10)),
                                   engine.Vector2D(rnd.randint(-500, 500),
                                                   rnd.randint(-500, 500)),
-                                  engine.Vector2D(0, 0),
+                                  engine.Vector2D(0, 9.8),
                                   rnd.randint(1, 10),
                                   rnd.randint(20, 80))
             self.scene.sphere_color[i] = (rnd.randint(0, 255),
@@ -242,6 +274,7 @@ class Game:
         for i in range (0, self.number_speres):
             self.scene.add_arrow(self.scene.sphere[i].pos,
                                  self.scene.sphere[i].vel,
+                                 self.scene.sphere[i].acc,
                                  (255 - self.scene.sphere_color[i][0],
                                   255 - self.scene.sphere_color[i][1],
                                   255 - self.scene.sphere_color[i][2])
@@ -288,14 +321,25 @@ class Game:
                     self.scene.border_active = False
                 else:
                     self.scene.border_active = True
-
+            """show vel_arrow"""
             if event.key == pygame.K_LCTRL:
                 for i in self.scene.sphere:
                     self.scene.vel_arrow[i](self.scene.sphere[i].pos, self.scene.sphere[i].vel)
-                if self.scene.arrow_enable is True:
-                    self.scene.arrow_enable = False
+
+                if self.scene.vel_arrow_enable is True:
+                    self.scene.vel_arrow_enable = False
                 else:
-                    self.scene.arrow_enable = True
+                    self.scene.vel_arrow_enable = True
+
+            """show acc_arrow"""
+            if event.key == pygame.K_LSHIFT:
+                for i in self.scene.sphere:
+                    self.scene.acc_arrow[i](self.scene.sphere[i].pos, self.scene.sphere[i].acc)
+
+                if self.scene.acc_arrow_enable is True:
+                    self.scene.acc_arrow_enable = False
+                else:
+                    self.scene.acc_arrow_enable = True
 
             if event.key == pygame.K_r:
                 #print("key r pressed")
@@ -309,6 +353,9 @@ class Game:
 
             if event.key == pygame.K_f:
                 self.key_f_pressed = True
+
+            if event.key == pygame.K_a:
+                self.key_a_pressed = True
 
             if event.key == pygame.K_m:
                 self.key_m_pressed = True
@@ -342,6 +389,9 @@ class Game:
                     self.scene.sphere[i].set_pos(self.pos)
                     self.scene.vel_arrow[i](self.scene.sphere[i].pos,
                                             self.scene.sphere[i].vel)
+
+                    self.scene.acc_arrow[i](self.scene.sphere[i].pos,
+                                            self.scene.sphere[i].acc)
                     i = False
 
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -395,15 +445,43 @@ class Game:
                         """up"""
                         if (event.button == 4):
                             self.scene.sphere[i].set_mass(self.scene.sphere[i].mass + 2)
-                            #self.scene.sphere[i].get_kinetic_energy()
                         """down"""
                         if (event.button == 5):
                             self.scene.sphere[i].set_mass(self.scene.sphere[i].mass - 2)
-                            #self.scene.sphere[i].get_kinetic_energy()
                         i = False
 
-        #if event.type[0] == :
-            #pass
+                """velocity"""
+                if (self.key_v_pressed is True):
+                    self.pos = pygame.mouse.get_pos()
+                    i = self.scene.in_sphere(self.pos)
+                    if i is not False:
+                        """up"""
+                        if (event.button == 4):
+                            self.scene.sphere[i].set_vel_abs(abs(self.scene.sphere[i].vel) + 5)
+                            self.scene.update_arrow_vel(i)
+                        """down"""
+                        if (event.button == 5):
+                            self.scene.sphere[i].set_vel_abs(abs(self.scene.sphere[i].vel) - 5)
+                            self.scene.update_arrow_vel(i)
+                        i = False
+
+                """acc"""
+                if (self.key_a_pressed is True):
+                    self.pos = pygame.mouse.get_pos()
+                    i = self.scene.in_sphere(self.pos)
+                    if i is not False:
+                        """up"""
+                        if (event.button == 4):
+                            self.scene.sphere[i].set_acc_abs(abs(self.scene.sphere[i].acc) + 2)
+                            self.scene.update_arrow_acc(i)
+                        """down"""
+                        if (event.button == 5):
+                            self.scene.sphere[i].set_acc_abs(abs(self.scene.sphere[i].acc) - 2)
+                            self.scene.update_arrow_acc(i)
+                        i = False
+
+
+
     def cleanup(self):
         """Cleanup the Game"""
         pygame.quit()

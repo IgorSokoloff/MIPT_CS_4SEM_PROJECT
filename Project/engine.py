@@ -28,12 +28,8 @@ class Vector2D:
         yy = self.y * math.cos(angle) + self.x * math.sin(angle)
         return Vector2D(xx, yy)
 
-        """
-    It returns scalar
-    @param: other - Vector2D
-    """
-    def сross_product (self, other):
-        return (self.x * other.y - self.y * other.x )
+    def сross_product(self, other):
+        return self.x * other.y - self.y * other.x
 
     def __repr__(self):
         return 'Vector2D({}, {})'.format(self.x, self.y)
@@ -113,18 +109,6 @@ class PlaneStatic2D:
     def __str__(self):
         return '({}, {}, {})'.format(self.point1, self.point2, self.normal)
 
-    """
-    def __setattr__(self, key, value):
-        print(key, value)
-        if not key in self.__dict__:
-            object.__setattr__(self, key, value)
-        elif key == "point1" or "point2":
-            object.__setattr__(self, key, value)
-            self.direction_vector = self.point1 - self.point2
-            self.normal = Vector2D(self.direction_vector.y, -self.direction_vector.x)
-    """
-
-
 """
     Base class. Argument pos [position] have to be setted
     pos, vel, acc have to be a specimen of Vector2D class
@@ -170,6 +154,13 @@ class Sphere(RigidBody):
             self.volume = self.mass / self.dencity
             self.radius = ((3 / 4) * self.volume / math.pi) ** (1 / 3)
 
+    """@param: new_vel - abs of Vector2D"""
+    def set_vel_abs (self, new_vel):
+        self.vel = self.vel * (new_vel/abs(self.vel))
+
+
+    def set_acc_abs(self, new_acc):
+        self.acc = self.acc * (new_acc / abs(self.acc))
 
     def set_dencity(self):
         pass
@@ -237,12 +228,15 @@ class Sphere(RigidBody):
     def update_pos (self, dt):
         self.pos += self.vel * dt
 
+    def update_acc(self, forse):
+        self.acc += forse * self.imass
     """
     update position and velocity
     """
 
 
-    def update(self, dt):
+    def update(self, dt, forse=0):
+        self.update_acc(forse)
         self.update_vel(dt)
         self.update_pos(dt)
 
@@ -260,6 +254,9 @@ class Scene:
 
         self.depth = []
         self.momentum = Vector2D(0, 0)
+
+
+        self.forse = Vector2D(0, 0)
 
         self.energy = 0
         # array of index
@@ -315,9 +312,10 @@ class Scene:
                     col_spheres.append((d_i_s[i], j))
         return col_spheres
 
-    def calculate_normal (self, i, j):
+    def calculate_normal(self, i, j):
         n = self.sphere[j].pos - self.sphere[i].pos
-        n.norm()
+
+        n = n/abs(n)
         return n
 
     def calculate_contact(self, i, j):
@@ -352,10 +350,13 @@ class Scene:
             self.sphere[col_spheres[i][0]].apply_impulse(contact, normal, impulse)
             self.sphere[col_spheres[i][1]].apply_impulse(contact, normal, -impulse)
 
+    def set_forse(self, forse=0):
+        self.forse = forse
 
+    """forse - vector of forse field in scene"""
     def update(self, dt):
         for i in self.sphere:
-            self.sphere[i].update(dt)
+            self.sphere[i].update(dt, self.forse)
 
     """Returns Vector2D sum momentum of system"""
     def calculate_momentum (self):
