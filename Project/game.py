@@ -76,7 +76,7 @@ class GScene(engine.Scene):
         self.border_active = True
 
         self.vel_arrow_enable  = False
-        self.acc_arrow_enable = False
+        self.acc_arrow_enable  = False
         self.forse_arrow_enable = False
         self.group_forse_arrow_enable = False
 
@@ -296,9 +296,9 @@ class Game:
                                                   rnd.randint(10, self.height - 10)),
                                   engine.Vector2D(rnd.randint(-500, 500),
                                                   rnd.randint(-500, 500)),
-                                  engine.Vector2D(0, 9.8),
+                                  engine.Vector2D(0, 0),
                                   rnd.randint(1, 10),
-                                  rnd.randint(20, 80))
+                                  rnd.randint(10, 11))
             self.scene.sphere_color[i] = (rnd.randint(0, 255),
                                           rnd.randint(0, 255),
                                           rnd.randint(0, 255))
@@ -365,13 +365,15 @@ class Game:
 
             """show acc_arrow"""
             if event.key == pygame.K_LSHIFT:
-                for i in self.scene.sphere:
-                    self.scene.acc_arrow[i](self.scene.sphere[i].pos, self.scene.sphere[i].acc)
 
                 if self.scene.acc_arrow_enable is True:
                     self.scene.acc_arrow_enable = False
                 else:
                     self.scene.acc_arrow_enable = True
+
+                for i in self.scene.sphere:
+                        self.scene.acc_arrow[i](self.scene.sphere[i].pos, self.scene.sphere[i].acc)
+
 
             if event.key == pygame.K_r:
                 #print("key r pressed")
@@ -478,9 +480,9 @@ class Game:
                 self.scene.add_sphere(engine.Vector2D(*self.pos),
                                       engine.Vector2D(rnd.randint(-500, 500),
                                                           rnd.randint(-500, 500)),
-                                      engine.Vector2D(0, 9.8),
+                                      engine.Vector2D(0, 0),
                                       rnd.randint(1, 20),
-                                      rnd.randint(20, 80))
+                                      rnd.randint(10, 11))
                 self.scene.sphere_color[self.scene.n_spheres-1] = (rnd.randint(0, 255),
                                               rnd.randint(0, 255),
                                               rnd.randint(0, 255))

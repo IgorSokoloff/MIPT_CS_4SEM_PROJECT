@@ -46,10 +46,10 @@ class Vector2D:
         return self
 
     def __eq__(self, other):
-        return self.x, self.y == other.x, other.y
+        return (self.x, self.y) == (other.x, other.y)
 
     def __ne__(self, other):
-        return self.x, self.y != other.x, other.y
+        return (self.x, self.y) != (other.x, other.y)
 
     def __sub__(self, other):
         return Vector2D(self.x - other.x, self.y - other.y)
