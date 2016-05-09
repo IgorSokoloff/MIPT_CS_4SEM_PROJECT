@@ -1,4 +1,10 @@
 # MIPT_CS_4SEM_PROJECT
-There source code of main project at 4 term.
-This project are 2d physics engine which can calculate collisions of simple geometric figure and graphic program which show possibilities of this engine.
-Programm language: Python.
+
+В данном репозитории находится исходный код проекта по информатике за 4 семестр МФТИ.
+
+Проект состоит из 2D физического движка и программы, которая задействует математический аппарат движка и отрисовывает сцену.
+Язык программирования: python + pygame
+
+#Возможности движка:
+
+#Возможности программы:
