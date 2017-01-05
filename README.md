@@ -18,21 +18,21 @@ Generate an unlimited number of balls on the same stage. Features check menu.
 
 #Control:
 _The methods are performed for whole scene:_
-+ *** Space *** - pause
-+ *** B *** - On / Off border
-+ *** Crt *** - on / off display velocity vectors
-+ *** Shift *** - on / off display of acceleration vectors
-+ *** RMB *** - add a new ball (its parameters are generated randomly (default acceleration is zero))
++ ***Space*** - pause
++ ***B*** - On / Off border
++ ***Crt*** - on / off display velocity vectors
++ ***Shift*** - on / off display of acceleration vectors
++ ***RMB*** - add a new ball (its parameters are generated randomly (default acceleration is zero))
 
 _The methods are performed for the concrete sphere of when you hover the cursor on it_
-+ *** Delete *** - remove the ball from the scene
-+ *** LMB *** - information output to the console of it
-+ *** LMB + MouseMotion *** - moving the ball
-+ *** R + MOusewheel *** - radius change 
-+ *** A + MOusewheel *** - acceleration change
-+ *** V + MOusewheel *** - speed change
-+ *** F + LMB + MouseMotion *** - the application of force to a concrete ball
-+ *** M + MOusewheel *** - mass change
++ ***Delete*** - remove the ball from the scene
++ ***LMB*** - information output to the console of it
++ ***LMB + MouseMotion*** - moving the ball
++ ***R + MOusewheel*** - radius change 
++ ***A + MOusewheel*** - acceleration change
++ ***V + MOusewheel*** - speed change
++ ***F + LMB + MouseMotion*** - the application of force to a concrete ball
++ ***M + MOusewheel*** - mass change
 
 
 #Rus
