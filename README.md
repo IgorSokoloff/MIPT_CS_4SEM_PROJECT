@@ -1,21 +1,22 @@
 # MIPT_CS_4SEM_PROJECT
 
 Here is the source code of the project in Informatics of 4 semester in MIPT.
+Demonstration video: https://youtu.be/pjhc5iVnPiU
 
 The project contains a 2D physics engine and a program used mathematical apparatus of the engine renders the scene.
 Programming language: python + pygame.
 Pygame used for rendering the scene and key events.
 
 
-##Opportunities of the engine:
+## Opportunities of the engine:
 Generate an unlimited set of scenes with an unlimited number of objects there.
 Smooth solid balls were used as physical objects.
 Implemented an algorithm for determining and processing of elastic collision between the balls.
 
-##Opportunities of the program:
+## Opportunities of the program:
 Generate an unlimited number of balls on the same stage. Features check menu.
 
-#Control:
+# Control:
 _The methods are performed for whole scene:_
 + ***Space*** - pause
 + ***B*** - On / Off border
@@ -37,21 +38,22 @@ _The methods are performed for the concrete sphere of when you hover the cursor 
 # MIPT_CS_4SEM_PROJECT
 
 В данном репозитории находится исходный код проекта по информатике за 4 семестр МФТИ.
+Демонстрационное видео: https://youtu.be/pjhc5iVnPiU
 
 Проект состоит из 2D физического движка и программы, которая задействует математический аппарат движка и отрисовывает сцену.
 Язык программирования: python + pygame.
 Pygame использовался в качеcтве средства рендеринга сцены и обработки нажатия клавиш.
 
 
-##Возможности движка:
+## Возможности движка:
 Генерировать неограниченное множество сцен с неограниченным количеством объектов на ней.
 В качестве физических объектов участвуют твердые гладкими  шарики.
 Реализован алгоритм определения и обработки упругих столкновений между шариками.
 
-##Возможности программы:
+## Возможности программы:
 Генерировать неограниченное количество шариков на одной сцене. Возможности программы отображатся меню управления.
 
-#Управление:
+# Управление:
 _Методы выполняются для всей сцены:_
 + ***space*** - пауза
 + ***b*** - вкл/выкл границы
