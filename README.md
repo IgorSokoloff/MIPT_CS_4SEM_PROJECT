@@ -1,6 +1,7 @@
 # MIPT_CS_4SEM_PROJECT
 
 Here is the source code of the project in Informatics of 4 semester in MIPT.
+
 Demonstration video: https://youtu.be/pjhc5iVnPiU
 
 The project contains a 2D physics engine and a program used mathematical apparatus of the engine renders the scene.
@@ -38,6 +39,7 @@ _The methods are performed for the concrete sphere of when you hover the cursor 
 # MIPT_CS_4SEM_PROJECT
 
 В данном репозитории находится исходный код проекта по информатике за 4 семестр МФТИ.
+
 Демонстрационное видео: https://youtu.be/pjhc5iVnPiU
 
 Проект состоит из 2D физического движка и программы, которая задействует математический аппарат движка и отрисовывает сцену.
