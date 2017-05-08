@@ -1,4 +1,3 @@
-#Eng
 ## MIPT_CS_4SEM_PROJECT
 
 Here is the source code of the project in Informatics of 4 semester in MIPT.
@@ -22,7 +21,7 @@ _The methods are performed for whole scene:_
 + ***B*** - On / Off border
 + ***Crt*** - on / off display velocity vectors
 + ***Shift*** - on / off display of acceleration vectors
-+ ***RMB*** - add a new ball (its parameters are generated randomly (default acceleration is zero))
++ ***RMB*** - add a new ball (its parameters are generated randomly)
 
 _The methods are performed for the concrete sphere of when you hover the cursor on it_
 + ***Delete*** - remove the ball from the scene
@@ -35,7 +34,6 @@ _The methods are performed for the concrete sphere of when you hover the cursor 
 + ***M + MOusewheel*** - mass change
 
 
-#Rus
 ## MIPT_CS_4SEM_PROJECT
 
 В данном репозитории находится исходный код проекта по информатике за 4 семестр МФТИ.
@@ -59,7 +57,7 @@ _Методы выполняются для всей сцены:_
 + ***b*** - вкл/выкл границы
 + ***crt*** - вкл/выкл отображения векторов скорости
 + ***shift*** - вкл/выкл отображения векторов ускорения
-+ ***RMB*** - добавить новую сферу (ее параметры генерируются случайно(по умолчанию ускорение нулевое))
++ ***RMB*** - добавить новую сферу (ее параметры генерируются случайно)
 
 _Методы выполняются для конкретной сферы при наведении на нее курсора:_
 + ***delete*** - удаление сферы со сцены

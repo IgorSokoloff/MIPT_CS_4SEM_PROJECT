@@ -1,11 +1,11 @@
 import pygame
-import math
+#import math
 import engine
 import random as rnd
 
-import tkinter as tk
+#import tkinter as tk
 from tkinter import *
-import os
+#import os
 
 
 class Rect:
@@ -268,7 +268,7 @@ class Game:
 
 
         # self.show_vel_vector = False
-        self.size = self.width, self.height = 800, 600
+        self.size = self.width, self.height = 1200, 800
         self.screen = pygame.display.set_mode(self.size, pygame.HWSURFACE)
         self.font = pygame.font.init()
         self.font = pygame.font.SysFont('mono', self.height // 30, bold=True)
@@ -285,7 +285,7 @@ class Game:
         self.world = World()
 
         rnd.seed()
-        self.number_speres = 2  # default
+        self.number_speres = 5  # default
 
         self.scene = GScene(self.width, self.height)
 
@@ -296,9 +296,10 @@ class Game:
                                                   rnd.randint(10, self.height - 10)),
                                   engine.Vector2D(rnd.randint(-500, 500),
                                                   rnd.randint(-500, 500)),
-                                  engine.Vector2D(0, 0),
+                                  engine.Vector2D(rnd.randint(-50, 50),
+                                                  rnd.randint(-50, 50)),
                                   rnd.randint(1, 10),
-                                  rnd.randint(10, 11))
+                                  rnd.randint(10, 70))
             self.scene.sphere_color[i] = (rnd.randint(0, 255),
                                           rnd.randint(0, 255),
                                           rnd.randint(0, 255))
@@ -480,9 +481,10 @@ class Game:
                 self.scene.add_sphere(engine.Vector2D(*self.pos),
                                       engine.Vector2D(rnd.randint(-500, 500),
                                                           rnd.randint(-500, 500)),
-                                      engine.Vector2D(0, 0),
+                                      engine.Vector2D(rnd.randint(-50, 50),
+                                                      rnd.randint(-50, 50)),
                                       rnd.randint(1, 20),
-                                      rnd.randint(10, 11))
+                                      rnd.randint(10, 50))
                 self.scene.sphere_color[self.scene.n_spheres-1] = (rnd.randint(0, 255),
                                               rnd.randint(0, 255),
                                               rnd.randint(0, 255))
