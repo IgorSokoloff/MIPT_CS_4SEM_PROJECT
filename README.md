@@ -1,4 +1,4 @@
-## MIPT_CS_4SEM_PROJECT
+# MIPT_CS_4SEM_PROJECT
 
 Here is the source code of the project in Informatics of 4 semester in MIPT.
 
@@ -34,7 +34,7 @@ _The methods are performed for the concrete sphere of when you hover the cursor 
 + ***M + MOusewheel*** - mass change
 
 
-## MIPT_CS_4SEM_PROJECT
+# MIPT_CS_4SEM_PROJECT
 
 В данном репозитории находится исходный код проекта по информатике за 4 семестр МФТИ.
 
