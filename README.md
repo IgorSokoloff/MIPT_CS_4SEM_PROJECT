@@ -1,6 +1,6 @@
-# MIPT_CS_4SEM_PROJECT
+# python_physics_engine
 
-Here is the source code of the project in Informatics of 4 semester in MIPT.
+Here is the source code of the project in Informatics of 4 semester at MIPT in 2016.
 
 Demonstration video: https://youtu.be/pjhc5iVnPiU
 
@@ -36,7 +36,7 @@ _The methods are performed for the concrete sphere of when you hover the cursor 
 + ***M + MOusewheel*** - mass change
 
 
-# MIPT_CS_4SEM_PROJECT
+# python_physics_engine
 
 В данном репозитории находится исходный код проекта по информатике за 4 семестр МФТИ.
 
